@@ -125,38 +125,38 @@ namespace AS_Assignment
                     return;
                 }
 
-                int scores = checkPassword(tb_password.Text);
-                string status = "";
-                switch (scores)
-                {
-                    case 1:
-                        status = "Very Weak";
-                        break;
-                    case 2:
-                        status = "Weak";
-                        break;
-                    case 3:
-                        status = "Medium";
-                        break;
-                    case 4:
-                        status = "Strong";
-                        break;
-                    case 5:
-                        status = "Excellent!";
-                        break;
-                    default:
-                        break;
-                }
+                //int scores = checkPassword(tb_password.Text);
+                //string status = "";
+                //switch (scores)
+                //{
+                //    case 1:
+                //        status = "Very Weak";
+                //        break;
+                //    case 2:
+                //        status = "Weak";
+                //        break;
+                //    case 3:
+                //        status = "Medium";
+                //        break;
+                //    case 4:
+                //        status = "Strong";
+                //        break;
+                //    case 5:
+                //        status = "Excellent!";
+                //        break;
+                //    default:
+                //        break;
+                //}
 
-                lbl_pwdchecker.Text = "Status : " + status;
-                if (scores < 4)
-                {
-                    lbl_pwdchecker.ForeColor = Color.Red;
-                    lbl_pwdchecker.Visible = true;
+                //lbl_pwdchecker.Text = "Status : " + status;
+                //if (scores < 4)
+                //{
+                //    lbl_pwdchecker.ForeColor = Color.Red;
+                //    lbl_pwdchecker.Visible = true;
                     
-                    return;
-                }
-                lbl_pwdchecker.ForeColor = Color.Green;
+                //    return;
+                //}
+                //lbl_pwdchecker.ForeColor = Color.Green;
 
                 //int score = checkPassword(tb_password.Text);
                 //if (score < 4)

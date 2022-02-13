@@ -71,7 +71,7 @@
             <br />
             <br />
             <asp:Label ID="passwordLabel" runat="server" Text="Password: "></asp:Label>
-            <asp:TextBox ID="tb_password" runat="server" TextMode="Password" onkeyup="javascript:Validate()"></asp:TextBox>
+            <asp:TextBox ID="tb_password" runat="server" TextMode="Password" onkeyup="javascript:validate()"></asp:TextBox>
             <!---onkeyup="javascript:Validate()" --->
             <asp:Label ID="lbl_pwdchecker" runat="server"></asp:Label>
             <br />
