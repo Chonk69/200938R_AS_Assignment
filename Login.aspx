@@ -5,7 +5,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
     <title></title>
-    <script src="https://www.google.com/recaptcha/api.js?render=6Ldw3WQeAAAAAAxqWrTxm6Ii1_lWKMRunWL8-7Q4"></script>
+    <script src="https://www.google.com/recaptcha/api.js?render=6Ldw3WQeAAAAAAxqWrTxm6Ii1_lWKMRunWL8-7Q4"></script>
+
 </head>
 <body>
     <form id="form1" runat="server">
@@ -35,6 +36,7 @@
                 document.getElementById("g-recaptcha-response").value = token;
             });
         });
-    </script>
+    </script>
+
 </body>
 </html>

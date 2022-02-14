@@ -67,6 +67,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="App_Data\MYDB.mdf" />
+    <Content Include="App_Data\MYDB_log.ldf">
+      <DependentUpon>MYDB.mdf</DependentUpon>
+    </Content>
     <Content Include="Captcha.aspx" />
     <Content Include="CustomError\GenericError.html" />
     <Content Include="CustomError\HTTP404.html" />

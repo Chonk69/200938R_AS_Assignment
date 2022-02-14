@@ -11,11 +11,20 @@ using System.IO;
 using System.Net;
 using System.Diagnostics;
 using System.Net.Mail;
+using System.Security.Cryptography;
+using System.Text;
+using System.Data;
+using System.Data.SqlClient;
 
 namespace AS_Assignment
 {
     public partial class Registration : System.Web.UI.Page
     {
+        string MYDBConnectionString = System.Configuration.ConfigurationManager.ConnectionStrings["MYDBConnection"].ConnectionString;
+        static string finalHash;
+        static string salt;
+        byte[] Key;
+        byte[] IV;
         protected void Page_Load(object sender, EventArgs e)
         {
 
@@ -72,6 +81,7 @@ namespace AS_Assignment
                 var pass = HttpUtility.HtmlEncode(tb_password.Text);
                 var dob = HttpUtility.HtmlEncode(DoB.Text);
                 var error = "";
+
                 if (fname == "")
                 {
                     error = error + " Enter First Name </br>";
@@ -124,51 +134,84 @@ namespace AS_Assignment
                     Debug.WriteLine(error);
                     return;
                 }
-
-                //int scores = checkPassword(tb_password.Text);
-                //string status = "";
-                //switch (scores)
-                //{
-                //    case 1:
-                //        status = "Very Weak";
-                //        break;
-                //    case 2:
-                //        status = "Weak";
-                //        break;
-                //    case 3:
-                //        status = "Medium";
-                //        break;
-                //    case 4:
-                //        status = "Strong";
-                //        break;
-                //    case 5:
-                //        status = "Excellent!";
-                //        break;
-                //    default:
-                //        break;
-                //}
-
-                //lbl_pwdchecker.Text = "Status : " + status;
-                //if (scores < 4)
-                //{
-                //    lbl_pwdchecker.ForeColor = Color.Red;
-                //    lbl_pwdchecker.Visible = true;
-                    
-                //    return;
-                //}
-                //lbl_pwdchecker.ForeColor = Color.Green;
-
-                //int score = checkPassword(tb_password.Text);
-                //if (score < 4)
-                //{
-                //    errorMsg.Text = "Password too weak";
-                //    errorMsg.ForeColor = Color.Red;
-                //    errorMsg.Visible = true;
-                //    return;
-                //}
-                Response.Redirect("Login.aspx");
             }
-            
+            using (var con = new SqlConnection(MYDBConnectionString))
+            {
+                con.Open();
+                var check = "SELECT * FROM [Account] WHERE Email = @Email";
+                var insert = "INSERT INTO [Account] VALUES(@Email,@Name, @PasswordHash, @PasswordSalt, @creditName, @CreditNo, @CreditDate, @CVV, @DoB)";
+                using (SqlCommand cmd = new SqlCommand(check, con))
+                {
+                    cmd.Parameters.AddWithValue("@Email", Email.Text);
+                    bool exist = Convert.ToBoolean(cmd.ExecuteScalar());
+                    if (exist)
+                    {
+                        errorMsg.Text = "Email already exist";
+                        errorMsg.ForeColor = Color.Red;
+                        errorMsg.Visible = true;
+                        return;
+                    }
+                }
+                using (SqlCommand cmd = new SqlCommand(insert, con))
+                {
+                    string pwd = lbl_pwdchecker.Text.ToString();
+
+                    RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
+                    byte[] saltByte = new byte[8];
+
+                    rng.GetBytes(saltByte);
+                    salt = Convert.ToBase64String(saltByte);
+
+                    SHA512Managed hashing = new SHA512Managed();
+
+
+                    string pwdWithSalt = pwd + salt;
+                    byte[] plainHash = hashing.ComputeHash(Encoding.UTF8.GetBytes(pwd));
+                    byte[] hashWithSalt = hashing.ComputeHash(Encoding.UTF8.GetBytes(pwdWithSalt));
+
+                    finalHash = Convert.ToBase64String(hashWithSalt);
+
+                    RijndaelManaged cipher = new RijndaelManaged();
+                    cipher.GenerateKey();
+                    Key = cipher.Key;
+                    IV = cipher.IV;
+                    var name = FName.Text + LName.Text;
+                    cmd.CommandType = CommandType.Text;
+                    cmd.Parameters.AddWithValue("@Email", Email.Text.Trim());
+                    cmd.Parameters.AddWithValue("@Name", name);
+                    cmd.Parameters.AddWithValue("@PasswordHash", finalHash);
+                    cmd.Parameters.AddWithValue("@PasswordSalt", salt);
+                    cmd.Parameters.AddWithValue("@CreditName", Convert.ToBase64String(encryptData(CreditName.Text.Trim())));
+                    cmd.Parameters.AddWithValue("@CreditNo", Convert.ToBase64String(encryptData(CreditNo.Text.Trim())));
+                    cmd.Parameters.AddWithValue("@CreditDate", Convert.ToBase64String(encryptData(CreditDate.Text.Trim())));
+                    cmd.Parameters.AddWithValue("@CVV", Convert.ToBase64String(encryptData(CVV.Text.Trim())));
+                    cmd.Parameters.AddWithValue("@DoB", DoB.Text.Trim());
+                    cmd.ExecuteNonQuery();
+                    Debug.WriteLine("user created");
+                }
+                con.Close();
+                Response.Redirect("Login.aspx");
+
+            }
+        }
+        protected byte[] encryptData(string data)
+        {
+            byte[] cipherText = null;
+            try
+            {
+                RijndaelManaged cipher = new RijndaelManaged();
+                cipher.IV = IV;
+                cipher.Key = Key;
+                ICryptoTransform encryptTransform = cipher.CreateEncryptor();
+                byte[] plainText = Encoding.UTF8.GetBytes(data);
+                cipherText = encryptTransform.TransformFinalBlock(plainText, 0, plainText.Length);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+            finally { }
+            return cipherText;
         }
 
         public class MyObject

@@ -81,7 +81,7 @@
             <br />
             <asp:Label ID="errorMsg" runat="server"></asp:Label>
             <br />
-            Photo??
+
 
 
         </div>
